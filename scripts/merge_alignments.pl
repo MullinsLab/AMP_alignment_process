@@ -30,10 +30,17 @@ opendir DIR, $indir or die "couldn't open $indir: $!\n";
 while (my $file = readdir DIR) {
 	if ($file =~ /(.*)\.fasta$/) {
 		$file = $indir."/".$file;
-		if ($file =~ /V(\d+)_(\d+)_(\d+)_([A-Z]+)/) {
+		if ($file =~ /V(\d+)_(\d+)_(\d+)_/) {
 			my $id = "V".$1."_".$2;
-			my $tp = $3;
-			my $region = $4;
+			my $tp = $3;			
+			my $region = "";
+			if ($file =~ /V\d+_\d+_\d+_rpt_([A-Z]+)/) {
+				$region = $1;
+			}elsif ($file =~ /V\d+_\d+_\d+_([A-Z]+)/) {
+				$region = $1;
+			}else {
+				die "Not right file format: $file\n";
+			}
 			if (!$regionStatus{$region}) {
 				$regionStatus{$region} = 1;
 				push @regions, $region;
@@ -46,16 +53,19 @@ while (my $file = readdir DIR) {
 			while (my $line = <IN>) {
 				chomp $line;
 				next if ($line =~ /^\s*$/);
-				if ($line =~ /^>(\S+)/) {
+				if ($line =~ /^>(.*)/) {
 					$name = $1;
 					if ($name =~ /_rpt_/) {
 						$name =~ s/_rpt_/_/;
-					}
-					if (!$sampleRegionNameFlag{$id}{$region}{$name}) {
-						$sampleRegionNameFlag{$id}{$region}{$name} = 1;
+					}					
+					$name =~ /^(\S+)(.*)/;
+					my $id = $1;
+					my $description = $2;						
+					if (!$sampleRegionNameFlag{$id}{$region}{$id}) {
+						$sampleRegionNameFlag{$id}{$region}{$id} = 1;
 					}else {
-						++$sampleRegionNameFlag{$id}{$region}{$name};
-						$name = $name."_".$sampleRegionNameFlag{$id}{$region}{$name};
+						++$sampleRegionNameFlag{$id}{$region}{$id};
+						$name = $id."_".$sampleRegionNameFlag{$id}{$region}{$id}.$description;
 					}
 				}else {
 					$line =~ s/\-//g;

@@ -16,7 +16,7 @@ foreach my $originfile (@ARGV) {
 	while (my $line = <ORIGIN>) {
 		chomp $line;
 		next if $line =~ /^\s*$/;
-		if ($line =~ /^>(\S+)/) {
+		if ($line =~ /^>(.*)/) {
 			++$origincount;
 			$originname = $1;
 		}else {
@@ -32,7 +32,7 @@ open IN, $inFasta or die "couldn't open $inFasta: $!\n";
 while (my $line = <IN>) {
 	chomp $line;
 	next if $line =~ /^\s*$/;	
-	if ($line =~ />(\S+)/) {
+	if ($line =~ />(.*)/) {
 		++$count;
 		$name = $1;
 	}else {
