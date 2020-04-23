@@ -15,6 +15,7 @@
 # Changes: For AMP alignments, add one option of region, change output file name and 
 # sequence names according to region 
 # Modified (2020-04-13): For AMP alignment pipeline, added option '-oa', removed '-rg'
+# Modified (2020-04-23): HXB2 doesn't have to be at the top of alignment
 ######################################################################################
 
 use strict;
@@ -56,7 +57,7 @@ open IN, $inFile or die "couldn't open $inFile: $!\n";
 while (my $line = <IN>) {
 	chomp $line;
 	next if $line =~ /^\s*$/;
-	if (!$refFlag && !$count && $line =~ />(\S+)/) {	# first sequence which is reference
+	if (!$refFlag and $line =~ /^>(\S*HXB2\S*)/) {	# reference sequences must have HXB2 sequence
 		$refName = $1;	
 		$refFlag = 1;
 	}elsif ($refFlag) {
@@ -69,6 +70,17 @@ while (my $line = <IN>) {
 	}
 }
 close IN;
+
+if (!$refName or !$refSeq) {
+	die "No HXB2 reference sequence\n";
+}
+
+my $refseqnogaps = $refSeq;
+$refseqnogaps =~ s/\-//g;
+my $reflen = length $refseqnogaps;
+if ($refEnd > $reflen) {
+	$refEnd = $reflen;
+}
 
 my @refNas = split //, $refSeq;
 my $idx = my $start = my $end = 0;
@@ -84,76 +96,54 @@ for (my $i = 0; $i < @refNas; $i++) {
 	}
 }
 
-open OUT, ">$outFile" or die "couldn't open $outFile: $!\n";
-if (!$rFlag) {
-	my $refPortion = substr($refSeq, $start, $end-$start+1);
-	if ($gFlag) {
-		$refPortion =~ s/\-//g;
-	}
-	print OUT ">$refName\n$refPortion\n";
-}
-
+open OUT, ">", $outFile or die "couldn't open $outFile: $!\n";
 open IN, $inFile or die "couldn't open $inFile: $!\n";
 while (my $line = <IN>) {
 	chomp $line;
 	next if $line =~ /^\s*$/;
-	if (!$refFlag && !$count && $line =~ />(\S+)/) {	# first sequence which is reference
-		$refFlag = 1;
-		$count++;
-	}elsif ($refFlag) {
-		if ($line =~ /^>/) {
-			$refFlag = 0;
-		}		
-	}
-	if (!$refFlag && $count) {
-		if ($line =~ />(\S+)/) {
-			if ($count > 1) {	# extract read
-				my $naStart = my $naEnd = 0;
-				if ($cpFlag) {					
-					my @nas = split //, $seq;
-					my $len = scalar @nas;
-					for (my $i = 0; $i < $len; $i++) {
-						if ($nas[$i] =~ /[A-Za-z]/) {
-							$naStart = $i;
-							last;
-						}
+	if ($line =~ />(\S+)/) {
+		if ($count >= 1) {	# extract region
+			my $naStart = my $naEnd = 0;
+			if ($cpFlag) {					
+				my @nas = split //, $seq;
+				my $len = scalar @nas;
+				for (my $i = 0; $i < $len; $i++) {
+					if ($nas[$i] =~ /[A-Za-z]/) {
+						$naStart = $i;
+						last;
 					}
-					for (my $i = $len - 1; $i >= 0; $i--) {
-						if ($nas[$i] =~ /[A-Za-z]/) {
-							$naEnd = $i;
-							last;
-						}
-					}						
 				}
-				my $portion = substr($seq, $start, $end-$start+1);
-				unless ($portion =~ /^\-+$/) {	# ignore all gaps
-					if ($gFlag) {
-						$portion =~ s/\-//g;
+				for (my $i = $len - 1; $i >= 0; $i--) {
+					if ($nas[$i] =~ /[A-Za-z]/) {
+						$naEnd = $i;
+						last;
 					}
-					if ($cpFlag) {
-						if ($naStart <= $start && $naEnd >= $end) {
-							print OUT ">$seqName\n$portion\n";
-							++$extractCount;
-						}
-					}else {
-						print OUT ">$seqName\n$portion\n";
-						++$extractCount;
-					}	
-				}
+				}						
 			}
-			$seqName = $1;
-			# keep original collapsed name
-#			$seqName =~ s/GP|REN/$region/;
-			$seq = '';
-			++$count;			
-		}else {
-			$seq .= $line;
+			my $portion = substr($seq, $start, $end-$start+1);
+			if ($gFlag) {
+				$portion =~ s/\-//g;
+			}
+			if ($cpFlag) {
+				if ($naStart <= $start && $naEnd >= $end) {
+					print OUT ">$seqName\n$portion\n";
+					++$extractCount;
+				}
+			}else {
+				print OUT ">$seqName\n$portion\n";
+				++$extractCount;
+			}	
 		}
-	}	
+		$seqName = $1;
+		$seq = '';
+		++$count;			
+	}else {
+		$seq .= $line;
+	}
 }
 close IN;
 
-# last read
+# last sequence
 my $naStart = my $naEnd = 0;
 if ($cpFlag) {					
 	my @nas = split //, $seq;
@@ -172,24 +162,18 @@ if ($cpFlag) {
 	}						
 }
 my $portion = substr($seq, $start, $end-$start+1);
-unless ($portion =~ /^\-+$/) {	# ignore all gaps
-	if ($gFlag) {
-		$portion =~ s/\-//g;
-	}
-	if ($cpFlag) {
-		if ($naStart <= $start && $naEnd >= $end) {
-			print OUT ">$seqName\n$portion\n";
-			++$extractCount;
-		}
-	}else {
+if ($gFlag) {
+	$portion =~ s/\-//g;
+}
+if ($cpFlag) {
+	if ($naStart <= $start && $naEnd >= $end) {
 		print OUT ">$seqName\n$portion\n";
 		++$extractCount;
-	}	
-}
-close OUT;
-
-if (!$rFlag) {
+	}
+}else {
+	print OUT ">$seqName\n$portion\n";
 	++$extractCount;
-}
+}	
+close OUT;
 
 print "total $count sequences, extracted $extractCount sequences in defined region.\n";
