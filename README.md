@@ -27,7 +27,7 @@ perl scriptPath/run_extraction_translation.pl –id directoryPath(default: .)
 –sp startPositionOfGagOrRevInHXB2
 ```
   - Extracts gene regions (Gag, Pol, Prot for GP; Rev, Vpu, Env, Nef for REN) in alignment based on the start positions in HXB2 within alignment
-    - Creates subdirectory “extractRegionName” to store extracted alignments and files produced by following steps
+    - Creates subdirectories of gene regions to store extracted alignments and files produced by following steps
   - Translates extracted nucleotide sequence alignment a corresponding amino acid sequence alignment
 #### 6. Manually inspect/edit translated amino acid alignment and adjust corresponding nucleotide alignment as needed
 #### 7. In the directory that contains alignments needed to be uncollapsed and the corresponding .name files, run 
