@@ -8,6 +8,8 @@
 # collapsed alignment
 # Author: Wenjie Deng
 # Date: 2020-04-08
+# Modified (2020-04-28): reversed sequences before muscle alignment and then reversed back
+# to make sequences left aligned
 ##########################################################################################
 
 use strict;
@@ -52,14 +54,28 @@ while (my $name = readdir DIR) {
 				$file = $subdir."/".$file;
 				print "\n=== Collapse sequences in $file ===\n";
 				system("perl $scriptspath/collapse_seqs.pl -if $file");
-				my $collapsedfile = my $alignedfile = my $orderedalignfile = my $refinedfile = $file;
+				my $collapsedfile = my $reversedfile = my $alignedfile = my $orderedalignfile = $file;
 				$collapsedfile =~ s/\.fasta/_collapsed.fasta/;
-				$alignedfile =~ s/\.fasta/_collapsed_aligned.fasta/;
-				$orderedalignfile =~ s/\.fasta/_collapsed_aligned_ordered.fasta/;
-				$refinedfile =~ s/\.fasta/_collapse.fasta/;
+				$reversedfile =~ s/\.fasta/_collapsed_reversed.fasta/;
+				$alignedfile =~ s/\.fasta/_collapsed_reversed_aligned.fasta/;
+				$orderedalignfile =~ s/\.fasta/_collapse.fasta/;
+				# reverse collapsed sequences to make left aligned after MSA
+				open IN, $collapsedfile or die "couldn't open $collapsedfile: $!\n";
+				open OUT, ">", $reversedfile or die "couldn't open $reversedfile: $!\n";
+				while (my $line = <IN>) {
+					chomp $line;
+					next if $line =~ /^\s*$/;
+					if ($line =~ /^>/) {
+						print OUT "$line\n";
+					}else {
+						my $rvseq = reverse $line;
+						print OUT "$rvseq\n";
+					}
+				}
+				close IN;
+				close OUT;
 				print "=== Align collapsed file $collapsedfile ===\n";
-				system("muscle -quiet -in $collapsedfile -out $alignedfile");
-				print "=== Order sequences in file $alignedfile ===\n";
+				system("muscle -quiet -in $reversedfile -out $alignedfile");
 				my $name = "";
 				my %idxName = my %nameSeq = ();
 				open IN, $alignedfile or die "couldn't open $alignedfile: $!\n";
@@ -81,13 +97,12 @@ while (my $name = readdir DIR) {
 				open OUT, ">", $orderedalignfile or die "couldn't open $orderedalignfile: $!\n";
 				foreach my $idx (sort {$a <=> $b} keys %idxName) {
 					my $name = $idxName{$idx};
-					print OUT ">$name\n$nameSeq{$name}\n";
+					my $seq = reverse $nameSeq{$name};
+					print OUT ">$name\n$seq\n";
 				}
-				close OUT;				
-				print "=== Refine alignment $orderedalignfile ===\n";
-				system("perl $scriptspath/refineAlignment_left.pl -ia $orderedalignfile -uf");
+				close OUT;
 				print "=== Verify sequences ===\n";
-				system("perl $scriptspath/verify_seq_origin.pl $refinedfile $collapsedfile");
+				system("perl $scriptspath/verify_seq_origin.pl $orderedalignfile $collapsedfile");
 			}
 		}
 		closedir SUBDIR;
