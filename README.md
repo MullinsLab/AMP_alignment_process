@@ -12,7 +12,6 @@ perl scriptPath/run_AMP_alignment_process.pl –id directoryPath(default: .)
     - Creates subdirectory “GP/REN” to store merged sequence files and files produced by the following steps
   - Collapses identical sequences into unique sequences, adds the number of sequences that were collapsed to the sequence name
   - Muscle aligns collapsed sequences
-  - Refines alignment to be left aligned in gap regions
 #### 2. Manually inspect/edit refined alignments
 #### 3. In the directory that contains both the inspected alignments and a reference alignment, run 
 ```

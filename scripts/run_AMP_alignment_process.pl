@@ -10,6 +10,9 @@
 # Date: 2020-04-08
 # Modified (2020-04-28): reversed sequences before muscle alignment and then reversed back
 # to make sequences left aligned
+# Modified (2020-05-14): don't reverse sequences before muscle alignment and don't refine
+# alignment, leave alignment as it is from the muscle alignment (right aligned that is 
+# the best for down stream codon alignment for individual gene by LANL's CodonAlign)
 ##########################################################################################
 
 use strict;
@@ -54,28 +57,12 @@ while (my $name = readdir DIR) {
 				$file = $subdir."/".$file;
 				print "\n=== Collapse sequences in $file ===\n";
 				system("perl $scriptspath/collapse_seqs.pl -if $file");
-				my $collapsedfile = my $reversedfile = my $alignedfile = my $orderedalignfile = $file;
+				my $collapsedfile = my $alignedfile = my $orderedalignfile = $file;
 				$collapsedfile =~ s/\.fasta/_collapsed.fasta/;
-				$reversedfile =~ s/\.fasta/_collapsed_reversed.fasta/;
-				$alignedfile =~ s/\.fasta/_collapsed_reversed_aligned.fasta/;
+				$alignedfile =~ s/\.fasta/_collapsed_aligned.fasta/;
 				$orderedalignfile =~ s/\.fasta/_collapse.fasta/;
-				# reverse collapsed sequences to make left aligned after MSA
-				open IN, $collapsedfile or die "couldn't open $collapsedfile: $!\n";
-				open OUT, ">", $reversedfile or die "couldn't open $reversedfile: $!\n";
-				while (my $line = <IN>) {
-					chomp $line;
-					next if $line =~ /^\s*$/;
-					if ($line =~ /^>/) {
-						print OUT "$line\n";
-					}else {
-						my $rvseq = reverse $line;
-						print OUT "$rvseq\n";
-					}
-				}
-				close IN;
-				close OUT;
 				print "=== Align collapsed file $collapsedfile ===\n";
-				system("muscle -quiet -in $reversedfile -out $alignedfile");
+				system("muscle -quiet -in $collapsedfile -out $alignedfile");
 				my $name = "";
 				my %idxName = my %nameSeq = ();
 				open IN, $alignedfile or die "couldn't open $alignedfile: $!\n";
@@ -97,7 +84,7 @@ while (my $name = readdir DIR) {
 				open OUT, ">", $orderedalignfile or die "couldn't open $orderedalignfile: $!\n";
 				foreach my $idx (sort {$a <=> $b} keys %idxName) {
 					my $name = $idxName{$idx};
-					my $seq = reverse $nameSeq{$name};
+					my $seq = $nameSeq{$name};
 					print OUT ">$name\n$seq\n";
 				}
 				close OUT;
