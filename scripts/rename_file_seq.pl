@@ -34,6 +34,8 @@ while (my $line = <IN>) {
 			$name = "V".$1."_".$2."_".$3."_".$4."_pblib".$5;
 		}elsif ($fname =~ /H(\d+)_(\d+)_(\d+)_(.*?)_e(\d+)/) {
 			$name = "V".$1."_".$2."_".$3."_".$4."_sga".$5;
+		}else {
+			$name = $fname;
 		}
 		if (@fields) {
 			$name = $name." ".join(' ', @fields);
