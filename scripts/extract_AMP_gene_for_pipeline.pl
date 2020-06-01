@@ -19,6 +19,8 @@
 ######################################################################################
 
 use strict;
+use warnings;
+use v5.10;
 use Getopt::Long;
 
 my $usage = "\nusage: extract_align_portion_w_ref_pos.pl [-option value]
@@ -55,7 +57,7 @@ my $refName = my $refSeq = my $seq = my $seqName = '';
 
 open IN, $inFile or die "couldn't open $inFile: $!\n";
 while (my $line = <IN>) {
-	chomp $line;
+	$line =~ s/\R$//;
 	next if $line =~ /^\s*$/;
 	if (!$refFlag and $line =~ /^>(\S*HXB2\S*)/) {	# reference sequences must have HXB2 sequence
 		$refName = $1;	
@@ -99,7 +101,7 @@ for (my $i = 0; $i < @refNas; $i++) {
 open OUT, ">", $outFile or die "couldn't open $outFile: $!\n";
 open IN, $inFile or die "couldn't open $inFile: $!\n";
 while (my $line = <IN>) {
-	chomp $line;
+	$line =~ s/\R$//;
 	next if $line =~ /^\s*$/;
 	if ($line =~ />(\S+)/) {
 		if ($count >= 1) {	# extract region

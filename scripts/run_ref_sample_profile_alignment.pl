@@ -9,6 +9,8 @@
 ################################################################################
 
 use strict;
+use warnings;
+use v5.10;
 use Getopt::Long;
 use File::Basename;
 

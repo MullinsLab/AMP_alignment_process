@@ -7,6 +7,8 @@
 #           Hxxx_xxxx_xxx_REN_e\d+ --> Vxxx_xxxx_xxx_REN_sga\d+
 
 use strict;
+use warnings;
+use v5.10;
 
 my $usage = "perl rename_file_seq.pl inFastaFile\n";
 my $infasta = shift or die $usage;
@@ -19,7 +21,8 @@ my (%nameNames, %nameSeq, @names);
 open IN, $infasta or die "couldn't open $infasta: $!\n";
 open OUT, ">", $outfile or die "couldn't open $outfile: $!\n";
 while (my $line = <IN>) {
-	chomp $line;
+#	chomp $line;
+	$line =~ s/\R$//;
 	next if $line =~ /^\s*$/;	
 	if ($line =~ />(.*)/) {
 		$wname = $1;

@@ -10,6 +10,8 @@
 ################################################################################
 
 use strict;
+use warnings;
+use v5.10;
 use Getopt::Long;
 use File::Basename;
 
@@ -44,7 +46,7 @@ my %nameTag;
 my (@uniqSeqs, $uniqDup);
 open INFASTA, $infile or die "couldn't open $infile: $!\n";
 while (my $line = <INFASTA>) {
-	chomp $line;
+	$line =~ s/\R$//;
 	next if ($line =~ /^\s*$/);
 	if ($line =~ /^>(.*)/) {
 		if ($seq) {
