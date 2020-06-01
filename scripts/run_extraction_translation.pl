@@ -13,6 +13,8 @@
 ##########################################################################################
 
 use strict;
+use warnings;
+use v5.10;
 use Getopt::Long;
 use File::Basename;
 
@@ -119,7 +121,7 @@ while (my $file = readdir DIR) {
 							my (@names, %rev1nameseq, %rev2nameseq);
 							open REV1, $rev1file or die "couldn't open $rev1file: $!\n";
 							while (my $line = <REV1>) {
-								chomp $line;
+								$line =~ s/\R$//;
 								next if $line =~ /^\s*$/;
 								if ($line =~ /^>(\S+)/) {
 									$name = $1;
@@ -132,7 +134,7 @@ while (my $file = readdir DIR) {
 							close REV1;
 							open REV2, $rev2file or die "couldn't open $rev2file: $!\n";
 							while (my $line = <REV2>) {
-								chomp $line;
+								$line =~ s/\R$//;
 								next if $line =~ /^\s*$/;
 								if ($line =~ /^>(\S+)/) {
 									$name = $1;

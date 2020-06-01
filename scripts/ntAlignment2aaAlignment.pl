@@ -5,6 +5,8 @@
 # xxxxx------xxxx --> XX--X
 
 use strict;
+use warnings;
+use v5.10;
 
 my $usage = "perl ntAlignment2aaAlignment.pl inNtAlignment\n";
 my $infile = shift or die $usage;
@@ -15,7 +17,7 @@ my $name = "";
 my (@names, %nameseq, @codonnts, @codongaps);
 open IN, $infile or die "couldn't open $infile: $!\n";
 while (my $line = <IN>) {
-	chomp $line;
+	$line =~ s/\R$//;
 	next if $line =~ /^\s*$/;
 	if ($line =~ /^>(.*)/) {
 		++$count;

@@ -2,6 +2,8 @@
 
 
 use strict;
+use warnings;
+use v5.10;
 
 my $usage = "perl verify_seq_origin.pl inSeqFastaFile inOriginFile1 (inOriginFile2 inOriginFile3 ...)\n";
 my $inFasta = shift @ARGV or die $usage;
@@ -14,7 +16,7 @@ my (%nameSeq, %originnameSeq, @names);
 foreach my $originfile (@ARGV) {
 	open ORIGIN, $originfile or die "couldn't open $originfile: $!\n";
 	while (my $line = <ORIGIN>) {
-		chomp $line;
+		$line =~ s/\R$//;
 		next if $line =~ /^\s*$/;
 		if ($line =~ /^>(.*)/) {
 			++$origincount;
@@ -30,7 +32,7 @@ foreach my $originfile (@ARGV) {
 
 open IN, $inFasta or die "couldn't open $inFasta: $!\n";
 while (my $line = <IN>) {
-	chomp $line;
+	$line =~ s/\R$//;
 	next if $line =~ /^\s*$/;	
 	if ($line =~ />(.*)/) {
 		++$count;

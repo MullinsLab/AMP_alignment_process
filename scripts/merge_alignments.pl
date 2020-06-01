@@ -8,6 +8,8 @@
 ##########################################################################################
 
 use strict;
+use warnings;
+use v5.10;
 use Getopt::Long;
 
 my %option = (
@@ -51,7 +53,9 @@ while (my $file = readdir DIR) {
 			}			
 			open IN, $file or die "couldn't open $file: $!\n";
 			while (my $line = <IN>) {
-				chomp $line;
+#				chomp $line;
+				$line =~ s/\R$//;
+				chop $line if $line =~ /\r$/; # in case input file in windows format (\r\n)
 				next if ($line =~ /^\s*$/);
 				if ($line =~ /^>(.*)/) {
 					$name = $1;

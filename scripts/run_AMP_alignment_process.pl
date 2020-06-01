@@ -13,6 +13,8 @@
 ##########################################################################################
 
 use strict;
+use warnings;
+use v5.10;
 use Getopt::Long;
 use File::Basename;
 
@@ -63,7 +65,8 @@ while (my $name = readdir DIR) {
 				open IN, $collapsedfile or die "couldn't open $collapsedfile: $!\n";
 				open OUT, ">", $reversedfile or die "couldn't open $reversedfile: $!\n";
 				while (my $line = <IN>) {
-					chomp $line;
+#					chomp $line;
+					$line =~ s/\R$//;
 					next if $line =~ /^\s*$/;
 					if ($line =~ /^>/) {
 						print OUT "$line\n";
@@ -80,7 +83,8 @@ while (my $name = readdir DIR) {
 				my %idxName = my %nameSeq = ();
 				open IN, $alignedfile or die "couldn't open $alignedfile: $!\n";
 				while (my $line = <IN>) {
-					chomp $line;
+#					chomp $line;
+					$line =~ s/\R$//;
 					next if $line =~ /^\s*$/;
 					if ($line =~ /^>(\S+)/) {
 						$name = $1;

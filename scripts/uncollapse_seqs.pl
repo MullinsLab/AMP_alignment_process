@@ -5,6 +5,8 @@
 # output: un-collapse sequence fasta file with original sequence names
 
 use strict;
+use warnings;
+use v5.10;
 
 my $usage = "perl uncollapse.pl inCollapsedSeqFastaFile inNameFile inNameFile1 (inNameFile2 inNameFile3 ...)\n";
 my $inFasta = shift @ARGV or die $usage;
@@ -19,7 +21,7 @@ my (%nameNames, %nameSeq, @names);
 foreach my $inName (@ARGV) {
 	open NAME, $inName or die "couldn't open $inName: $!\n";
 	while (my $line = <NAME>) {
-		chomp $line;
+		$line =~ s/\R$//;
 		next if $line =~ /^\s*$/;
 		my ($uniqname, $originalnames) = split /\t/, $line;
 		@{$nameNames{$uniqname}} = split /,/, $originalnames;
@@ -29,7 +31,7 @@ foreach my $inName (@ARGV) {
 
 open IN, $inFasta or die "couldn't open $inFasta: $!\n";
 while (my $line = <IN>) {
-	chomp $line;
+	$line =~ s/\R$//;
 	next if $line =~ /^\s*$/;	
 	if ($line =~ />(\S+)/) {
 		$name = $1;
