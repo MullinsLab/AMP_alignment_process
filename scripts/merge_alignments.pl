@@ -32,14 +32,14 @@ opendir DIR, $indir or die "couldn't open $indir: $!\n";
 while (my $file = readdir DIR) {
 	if ($file =~ /(.*)\.fasta$/) {
 		$file = $indir."/".$file;
-		if ($file =~ /V(\d+)_(\d+)_(\d+)_/) {
+		if ($file =~ /V(\d+)_(\d+)_(.*?)_/) { # allow multiple time points file: (.*?) could be \d+ or \d+-\d+ or \d+-\d+-\d+ and so on
 			my $id = "V".$1."_".$2;
 			my $tp = $3;			
 			my $region = "";
-			if ($file =~ /V\d+_\d+_\d+_rpt_([A-Z]+)/) {
-				$region = $1;
-			}elsif ($file =~ /V\d+_\d+_\d+_([A-Z]+)/) {
-				$region = $1;
+			if ($file =~ /V\d+_\d+_(.*?)_rpt\d?_([A-Z]+)/) { # allow multiple repeats like _rpt2_, _rpt3_, etc.
+				$region = $2;
+			}elsif ($file =~ /V\d+_\d+_(.*?)_([A-Z]+)/) {
+				$region = $2;
 			}else {
 				die "Not right file format: $file\n";
 			}
@@ -55,13 +55,12 @@ while (my $file = readdir DIR) {
 			while (my $line = <IN>) {
 #				chomp $line;
 				$line =~ s/\R$//;
-				chop $line if $line =~ /\r$/; # in case input file in windows format (\r\n)
 				next if ($line =~ /^\s*$/);
 				if ($line =~ /^>(.*)/) {
 					$name = $1;
-					if ($name =~ /_rpt_/) {
-						$name =~ s/_rpt_/_/;
-					}					
+					if ($name =~ /_rpt\d?_/) {	# allow multiple repeats like _rpt2_, _rpt3_, etc.
+						$name =~ s/_rpt\d?_/_/;
+					} 					
 					$name =~ /^(\S+)(.*)/;
 					my $id = $1;
 					my $description = $2;						
