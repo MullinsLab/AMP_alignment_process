@@ -40,6 +40,7 @@ while (my $line = <IN>) {
 		}else {
 			$name = $fname;
 		}
+		$name =~ s/^H(\d+)/V$1/;
 		if (@fields) {
 			$name = $name." ".join(' ', @fields);
 		}
