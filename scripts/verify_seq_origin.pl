@@ -46,7 +46,7 @@ while (my $line = <IN>) {
 close IN;
 
 if ($count != $origincount) {
-	die "number of sequences are not same. count $count, original count $origincount\n";
+	print "number of sequences are not same. count $count, original count $origincount\n";
 }
 
 foreach my $originalname (keys %originnameSeq) {
