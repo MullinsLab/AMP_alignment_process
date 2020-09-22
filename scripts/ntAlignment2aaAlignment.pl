@@ -36,25 +36,16 @@ foreach my $name (@names) {
 	my $len = length $seq;
 	my @nts = split //, $seq;
 	my $aaseq = my $partialaaseq = "";
+	my $flag = 0;
 	my (@codonnts, @codongaps);
-	for (my $i = 0; $i < $len; $i += 3) {
+	for (my $i = 0; $i < $len; $i++) {
 		my $ntcount = scalar @codonnts;
-		if ($nts[$i] =~ /[ACTG]/) {
+		if ($nts[$i] eq "-") {
+			push @codongaps, "-";
+		}elsif ($nts[$i] =~ /[ACTG]/) {
 			push @codonnts, $nts[$i];
-		}elsif ($nts[$i] eq "-") {
-			push @codongaps, $nts[$i];
 		}
-		if ($nts[$i+1] =~ /[ACTG]/) {
-			push @codonnts, $nts[$i+1];
-		}elsif ($nts[$i+1] eq "-") {
-			push @codongaps, $nts[$i+1];
-		}
-		if ($nts[$i+2] =~ /[ACTG]/) {
-			push @codonnts, $nts[$i+2];
-		}elsif ($nts[$i+2] eq "-") {
-			push @codongaps, $nts[$i+2];
-		}
-		
+				
 		if (scalar @codongaps >= 3) {
 			shift @codongaps;
 			shift @codongaps;
