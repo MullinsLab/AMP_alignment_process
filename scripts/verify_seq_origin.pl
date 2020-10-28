@@ -49,14 +49,24 @@ if ($count != $origincount) {
 	print "number of sequences are not same. count $count, original count $origincount\n";
 }
 
+my $exactcount = my $containcount = 0;
 foreach my $originalname (keys %originnameSeq) {
 	if ($nameSeq{$originalname}) {
-		unless ($nameSeq{$originalname} eq $originnameSeq{$originalname}) {
-			die "sequences not same! nameSeq{$originalname}: $nameSeq{$originalname}\noriginnameSeq{$originalname}: $originnameSeq{$originalname}\n";
+		my $seq = $nameSeq{$originalname};
+		my $originalseq = $originnameSeq{$originalname};
+		if ($seq eq $originalseq) {
+			++$exactcount;
+		}else {
+			my $idx = index ($originalseq, $seq);
+			if ($idx >= 0) {
+				++$containcount;
+			}else {
+				die "sequence not in original sequence! nameSeq{$originalname}: $nameSeq{$originalname}\noriginnameSeq{$originalname}: $originnameSeq{$originalname}\n";
+			}
 		}
 	}else {
-		print "$originalname missing in uncollapse file\n";
+		print "$originalname missing in $inFasta file\n";
 	}
 }
 
-print "total $count sequences, all verified.\n";
+print "total $count sequences, $origincount original sequences, $exactcount exact match, $containcount contained in original sequences, all verified.\n";
