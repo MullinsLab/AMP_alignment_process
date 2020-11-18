@@ -8,17 +8,19 @@ use strict;
 use warnings;
 use v5.10;
 
-my $usage = "perl uncollapse.pl inCollapsedSeqFastaFile\n";
+my $usage = "perl uncollapse.pl inCollapsedSeqFastaFile nameFileDirectory nameFileSuffix(including file extension)\n\n";
 my $inFasta = shift or die $usage;
+my $namedir = shift or die $usage;
+my $suffix = shift or die $usage;
 my $namefile = "";
 my $outfile = $inFasta;
 $outfile =~ s/\.fasta|\.fas/_uncollapsed.fasta/;
-if ($inFasta =~ /^V(\d+)_(\d+)_(.*?)_(.*?)_NT_/) {
-	$namefile = "../../NameNoriginalFiles/V".$1."_".$2."_".$3."_".$4."_NT.fasta.name";
+if ($inFasta =~ /^V(\d+)_(\d+)_(.*?)_/) {
+	$namefile = "$namedir/V".$1."_".$2."_".$3."_".$suffix;
 }else {
 	die "file name not formatted: $inFasta\n";
 }
-print "\n*** uncollapsing $inFasta ***\n";
+print "\n*** uncollapsing $inFasta based on $namefile ***\n";
 my $name = "";
 my $count = my $uniqcount = 0;
 my (%nameNames, %nameSeq, @names);
