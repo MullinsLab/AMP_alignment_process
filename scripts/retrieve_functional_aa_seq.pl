@@ -14,9 +14,14 @@ my $summaryfile = shift or die $usage;
 my $outfile = my $defectivefile = $infile;
 $outfile =~ s/\.fasta/_functional.fasta/;
 $defectivefile =~ s/\.fasta/_defective.fasta/;
+my $ntfile = $infile;
+$ntfile =~ s/_AA/_NT/;
+my $ntoutfile = my $ntdefectivefile = $ntfile;
+$ntoutfile =~ s/\.fasta/_functional.fasta/;
+$ntdefectivefile =~ s/\.fasta/_defective.fasta/;
 my $count = my $seqcount = my $hxb2alignlen = my $functionalcount = my $deletioncount = my $prematurecount = my $missing5count = my $maxalignlen = my $notMcount = 0;
 my $name = "";
-my (@names, %nameseq, @lens, @alignlens, %namestatus);
+my (@names, %nameseq, @lens, @alignlens, %namestatus, %namentseq);
 open IN, $infile or die "couldn't open $infile: $!\n";
 while (my $line = <IN>) {
 	$line =~ s/\R$//;
@@ -31,6 +36,23 @@ while (my $line = <IN>) {
 	}
 }
 close IN;
+
+if (-e $ntfile) {
+    open IN, $ntfile or die "couldn't open $ntfile: $!\n";
+	while (my $line = <IN>) {
+		$line =~ s/\R$//;
+		next if $line =~ /^\s*$/;
+		if ($line =~ /^>(.*)/) {
+			$name = $1;
+		}else {
+			$line = uc $line;
+			$namentseq{$name} .= $line;
+		}
+	}
+	close IN;
+}else {
+	die "No corresponding NT alignment $ntfile exist.\n";
+}
 
 foreach my $name (@names) {
 	my $seq = $nameseq{$name};
@@ -89,18 +111,25 @@ foreach my $name (@names) {
 	}
 }
 
+open NTOUT, ">", $ntoutfile or die "couldn't open $ntoutfile: $!\n";
+open NTDFCT, ">", $ntdefectivefile or die "couldn't open $ntdefectivefile: $!\n";
 open OUT, ">", $outfile or die "couldn't open $outfile: $!\n";
 open DFCT, ">", $defectivefile or die "couldn't open $defectivefile: $!\n";
 foreach my $name (@names) {
 	my $seq = $nameseq{$name};
+	my $ntseq = $namentseq{$name};
 	if ($namestatus{$name}) {
 		print OUT ">$name\n$seq\n";
+		print NTOUT ">$name\n$ntseq\n";;
 	}else {
 		print DFCT ">$name\n$seq\n";
+		print NTDFCT ">$name\n$ntseq\n";
 	}
 }
 close OUT;
 close DFCT;
+close NTOUT;
+close NTDFCT;
 
 open SUMMARY, ">>", $summaryfile or die "couldn't open $summaryfile: $!\n";
 print SUMMARY "$infile,$seqcount,$functionalcount,$prematurecount,$deletioncount,$missing5count,$notMcount,$medianlen\n";
