@@ -835,7 +835,7 @@ sub codon_align
    $cut_stdseq = $seq_r -> [$seqnum];
    $stdseq_length = length $cut_stdseq;
 
-   for ($start = 0; $start <= $stdseq_length; $start= $start + 3){
+   for ($start = 0; $start < $stdseq_length; $start= $start + 3){
        @cut_stdseq = ();
        @cut_stdseq = split(//,$cut_stdseq);
        $pos1 = $start;
