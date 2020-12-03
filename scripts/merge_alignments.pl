@@ -32,13 +32,13 @@ opendir DIR, $indir or die "couldn't open $indir: $!\n";
 while (my $file = readdir DIR) {
 	if ($file =~ /(.*)\.fasta$/) {
 		$file = $indir."/".$file;
-		if ($file =~ /V(\d+)_(\d+)_(.*?)_/) { # allow multiple time points file: (.*?) could be \d+ or \d+-\d+ or \d+-\d+-\d+ and so on
-			my $id = "V".$1."_".$2;
+		if ($file =~ /(RV\d+)_(\d+)_(.*?)_/ or $file =~ /(V\d+)_(\d+)_(.*?)_/) { # allow multiple time points file: (.*?) could be \d+ or \d+-\d+ or \d+-\d+-\d+ and so on
+			my $id = $1."_".$2;
 			my $tp = $3;			
 			my $region = "";
-			if ($file =~ /V\d+_\d+_(.*?)_rpt\d?_([A-Z]+)/) { # allow multiple repeats like _rpt2_, _rpt3_, etc.
+			if ($file =~ /R?V\d+_\d+_(.*?)_rpt\d?_([A-Z]+)/) { # allow multiple repeats like _rpt2_, _rpt3_, etc.
 				$region = $2;
-			}elsif ($file =~ /V\d+_\d+_(.*?)_([A-Z]+)/) {
+			}elsif ($file =~ /R?V\d+_\d+_(.*?)_([A-Z]+)/) {
 				$region = $2;
 			}else {
 				die "Not right file format: $file\n";
