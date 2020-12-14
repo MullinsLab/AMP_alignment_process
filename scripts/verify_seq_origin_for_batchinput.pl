@@ -13,6 +13,8 @@ my $originfile = "";
 
 if ($inFasta =~ /^V(\d+)_(\d+)_(.*?)_/) {
     $originfile = $dir."/V".$1."_".$2."_".$3."_".$suffix;
+}elsif ($inFasta =~ /^RV(\d+)_(\d+)_(.*?)_/) {
+    $originfile = $dir."/RV".$1."_".$2."_".$3."_".$suffix;
 }else {
 	die "file name not formatted: $inFasta\n";
 }

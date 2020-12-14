@@ -14,8 +14,10 @@ my $namedir = shift or die $usage;
 my $suffix = shift or die $usage;
 my $namefile = "";
 my $outfile = $inFasta;
-$outfile =~ s/\.fasta|\.fas/_uncollapsed.fasta/;
-if ($inFasta =~ /^V(\d+)_(\d+)_(.*?)_/) {
+$outfile =~ s/\.fasta|\.fas/_uncollapse.fasta/;
+if ($inFasta =~ /^RV(\d+)_(\d+)_(.*?)_/) {
+	$namefile = "$namedir/RV".$1."_".$2."_".$3."_".$suffix;
+}elsif ($inFasta =~ /^V(\d+)_(\d+)_(.*?)_/) {
 	$namefile = "$namedir/V".$1."_".$2."_".$3."_".$suffix;
 }else {
 	die "file name not formatted: $inFasta\n";
