@@ -31,6 +31,6 @@ perl scriptPath/run_extraction_translation.pl –id directoryPath(default: .)
 #### 6. Manually inspect/edit translated amino acid alignment and adjust corresponding nucleotide alignment as needed
 #### 7. In the directory that contains alignments needed to be uncollapsed and the corresponding .name files, run 
 ```
-perl scriptPath/uncollapse_seqs.pl –if inputFile –nf nameFile
+perl scriptPath/uncollapse_seqs.pl inputFile nameFile
 ```
   - Uncollapses alignment into full alignment of individual sequences with sequence names
