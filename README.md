@@ -3,7 +3,7 @@ A workflow and toolkit of perl scripts to manipulate multiple sequence alignment
 
 ### Usage
 
-#### 1. In a directory that contains nucleotide sequence fasta files, run 
+#### 1.  In a directory that contains nucleotide sequence fasta files, run 
 ```
 perl scriptPath/run_AMP_alignment_process.pl –id directoryPath(default: .)
 ```
@@ -14,25 +14,31 @@ perl scriptPath/run_AMP_alignment_process.pl –id directoryPath(default: .)
   - Reverses collapsed sequences
   - Muscle aligns reversed sequences
   - Reverses back aligned sequences
-#### 2. Manually inspect/edit refined alignments
-#### 3. In the directory that contains both the inspected alignments and a reference alignment, run 
+#### 2.  Manually inspect/edit refined alignments
+#### 3.  In the directory that contains both the inspected alignments and HXB2 GP/REN sequence fasta file, run 
 ```
 perl scriptPath/run_ref_sample_profile_alignment.pl –id directoryPath(default: .) 
-–ref referenceFileName
+–ref HXB2FileName
 ```
-  - Merges reference alignment to participant sequence alignment by profile alignment
-#### 4. Manually inspect/edit reference containing alignments
-#### 5. In the directory that contains the inspected reference-included alignments, run 
+  - Merges HXB2 sequence to participant sequence alignment by profile alignment
+#### 4.  In the directory that contains the inspected HXB2-included alignments, run 
 ```
-perl scriptPath/run_extraction_translation.pl –id directoryPath(default: .) 
-–sp startPositionOfGagOrRevInHXB2
+perl scriptPath/run_gagenv_extraction_translation.pl –id directoryPath(default: .) 
+–sp startPositionOfGagOrRevInHXB2(default: 1)
 ```
-  - Extracts gene regions (Gag, Pol, Prot for GP; Rev, Vpu, Env, Nef for REN) in alignment based on the start positions in HXB2 within alignment
+  - Extracts gene regions (Gag for GP; Env for REN) in alignment based on the start positions in HXB2 within alignment
     - Creates subdirectories of gene regions to store extracted alignments and files produced by following steps
-  - Translates extracted nucleotide sequence alignment a corresponding amino acid sequence alignment
-#### 6. Manually inspect/edit translated amino acid alignment and adjust corresponding nucleotide alignment as needed
-#### 7. In the directory that contains alignments needed to be uncollapsed and the corresponding .name files, run 
+  - Translates extracted nucleotide sequence alignment to a corresponding amino acid sequence alignment
+  - Retrieves functional protein sequences by filtering out defective protein sequences (Sequence doesn’t start with “ATG”, premature stop codon locates before 95% of median protein sequence length, deletion is > 80% of protein sequence median length)
+  - Collapse functional protein sequence alignment
+#### 5.  Manually inspect/edit translated functional amino acid alignment
+#### 6.  In the directory that contains reviewed functional protein sequence alignments, run
 ```
-perl scriptPath/uncollapse_seqs.pl –if inputFile –nf nameFile
+perl scriptPath/calcAAconsensus_0majority_ignore_gaps.pl inFileName
 ```
-  - Uncollapses alignment into full alignment of individual sequences with sequence names
+  - Calculate amino acid consensus sequence (0% majority and ignore gaps) for each subject's functional amino acid alignment
+    - Creates two subdirectories. One contains a file of all subjects' consensus sequences. The other contains a file of all subjects' consensus sequences and individual sequence.
+#### 7.  Align all subjects' functional amino acid consensus sequences via Muscle
+#### 8.  Manually inspect/edit all subjects' amino acid consensus sequence alignment
+#### 9.  Align reference sequence alignment and consensus sequence alignment via Muscle’s profile-profile alignment to make a master alignment
+#### 10. Manually inspect/edit the master alignment
