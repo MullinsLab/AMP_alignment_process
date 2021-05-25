@@ -1,14 +1,13 @@
 #!/usr/bin/perl
 
 # calculate consensus sequence from an AA sequence alignment
-# majority character (including "-") gets consensus. If two or more AA share the majority, "X" will be consensus.
-# If an AA and "-" share the majority, the "AA" will be consensus
+# majority character (including "-") gets consensus ("B" for gap). If two or more AA (including "-") share the majority, "X" will be consensus.
 
 use strict;
 use warnings;
 use v5.10;
 
-my $usage = "perl calcAAconsensus_0majority_dont_ignore_gaps.pl infile outconsensusfile\n";
+my $usage = "perl calcAAconsensus_0majority_dont_ignore_gaps.pl infile\n";
 my $infile = shift or die $usage;
 my $outconsfile = my $outaafile = ""; 
 my $subject = "";
@@ -58,34 +57,30 @@ foreach my $name (@names) {
 for (my $i = 0; $i < $alignlen; $i++) {
 	my %posAAcount = ();
 	foreach my $name (@names) {
+		if ($nameAAs{$name}[$i] eq "*") {
+			$nameAAs{$name}[$i] = "Z";
+		}
 		if ($name =~ /_(\d+)$/) {
 			$posAAcount{$nameAAs{$name}[$i]} += $1;
 		}else {
-			die "name not formatted: $name\n";
+			++$posAAcount{$nameAAs{$name}[$i]};
 		}
 	}
 	
 	my @sortedaas = sort {$posAAcount{$b} <=> $posAAcount{$a}} keys %posAAcount;
+	
 	if (scalar @sortedaas == 1) {
-		push @consAAs, $sortedaas[0];
+		unless ($sortedaas[0] eq "-") { # not all gaps
+			push @consAAs, $sortedaas[0];
+		}		
 	}elsif ($posAAcount{$sortedaas[0]} > $posAAcount{$sortedaas[1]}) {
-		push @consAAs, $sortedaas[0];
-	}elsif ($posAAcount{$sortedaas[0]} == $posAAcount{$sortedaas[1]}) {
-		if ($posAAcount{$sortedaas[0]} ne "-" and $posAAcount{$sortedaas[1]} ne "-") {
-			push @consAAs, "X";
+		if ($sortedaas[0] eq "-") {
+			push @consAAs, "B";
 		}else {
-			if (scalar @sortedaas == 2 or $posAAcount{$sortedaas[1]} > $posAAcount{$sortedaas[2]}) {
-				if ($posAAcount{$sortedaas[0]} ne "-") {
-					push @consAAs, $sortedaas[0];
-				}else {
-					push @consAAs, $sortedaas[1];
-				}
-			}elsif ($posAAcount{$sortedaas[1]} == $posAAcount{$sortedaas[2]}) {
-				push @consAAs, "X";
-			}else {
-				die "impossible! posAAcount{$sortedaas[1]}: $posAAcount{$sortedaas[1]} < posAAcount{$sortedaas[2]}: $posAAcount{$sortedaas[2]}\n";
-			}			
-		}
+			push @consAAs, $sortedaas[0];	
+		}		
+	}elsif ($posAAcount{$sortedaas[0]} == $posAAcount{$sortedaas[1]}) {
+		push @consAAs, "X";
 	}else {
 		die "impossible! posAAcount{$sortedaas[0]}: $posAAcount{$sortedaas[0]} < posAAcount{$sortedaas[1]}: $posAAcount{$sortedaas[1]}\n";
 	}
