@@ -8,18 +8,18 @@ use v5.10;
 my $usage = "perl separate_timepoint_sequences.pl inSeqFastaFile\n";
 my $infile = shift or die $usage;
 print "\n*** Processing $infile ***\n";
-if ($infile =~ /^V(\d+)_(\d+)_(.*?)_(.*)/) {
-	my $vid = $1;
-	my $sid = $2;
-	my $tps = $3;
-	my $rest = $4;
+if ($infile =~ /^(.*?)(\d+)_(\d+)_(.*?)_(.*)/) {
+	my $vid = $1.$2;
+	my $sid = $3;
+	my $tps = $4;
+	my $rest = $5;
 	my @tpss = split /\-/, $tps;
 	if (scalar @tpss == 1) {
 		print "Only one time point\n";
 		exit;
 	}else {
 		foreach my $tp (@tpss) {
-			my $outfile = "V".$vid."_".$sid."_".$tp."_".$rest;
+			my $outfile = $vid."_".$sid."_".$tp."_".$rest;
 			my $tpreg = "_".$tp."_";
 			my $name = "";
 			my $count = my $tpcount = my $flag = 0;
